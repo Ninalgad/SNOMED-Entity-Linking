@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="../static/style.css">
+
+    <!-- D3 -->
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <!--
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.7.1.min.js"></script>
+    -->
+    
+    
+
+    <title>Title</title>
+</head>
+<body>
+<div class="row">
+  <div class="column" id="container">
+      <textarea id="textarea" class="container__textarea" >
+This demo shows you how to highlight bits of text within a textarea. Alright, that's a lie. You can't actually render markup inside a textarea. However, you can fake it by carefully positioning a div behind the textarea and adding your highlight markup there. JavaScript takes care of syncing the content and scroll position from the textarea to the div, so everything lines up nicely. Hit the toggle button to peek behind the curtain. And feel free to edit this text. All capitalized words will be highlighted.
+        </textarea>
+
+  </div>
+<div class="column">
+
+<form class="column">
+    <table>
+   <thead>
+   <tr>
+       <th>Image</th>
+       <th>Name</th>
+       <th>Author</th>
+   </tr>
+   </thead>
+  <tbody id="txtItems"></tbody>
+</table>
+</form>
+</div>
+</div>
+    
+<script src="../static/highlghts.js"></script>
+</body>
+</html>
