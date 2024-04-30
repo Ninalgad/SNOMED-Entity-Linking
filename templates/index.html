@@ -19,23 +19,25 @@
 <body>
 <div class="row">
   <div class="column" id="container">
-      <textarea id="textarea" class="container__textarea" >
-This demo shows you how to highlight bits of text within a textarea. Alright, that's a lie. You can't actually render markup inside a textarea. However, you can fake it by carefully positioning a div behind the textarea and adding your highlight markup there. JavaScript takes care of syncing the content and scroll position from the textarea to the div, so everything lines up nicely. Hit the toggle button to peek behind the curtain. And feel free to edit this text. All capitalized words will be highlighted.
+      <textarea id="textarea" class="container__textarea" onkeydown="if (event.keyCode == 13) document.getElementById('btnSearch').click()">
+Of 1035 records entered into the CCC19 database during the study period, 928 patients met inclusion criteria for our analysis. Median age was 66 years (IQR 57–76), 279 (30%) were aged 75 years or older, and 468 (50%) patients were male. The most prevalent malignancies were breast (191 [21%]) and prostate (152 [16%]). 366 (39%) patients were on active anticancer treatment, and 396 (43%) had active (measurable) cancer. At analysis (May 7, 2020), 121 (13%) patients had died. In logistic regression analysis, independent factors associated with increased 30-day mortality, after partial adjustment, were: increased age (per 10 years; partially adjusted odds ratio 1·84, 95% CI 1·53–2·21), male sex (1·63, 1·07–2·48), smoking status (former smoker vs never smoked: 1·60, 1·03–2·47), number of comorbidities (two vs none: 4·50, 1·33–15·28), Eastern Cooperative Oncology Group performance status of 2 or higher (status of 2 vs 0 or 1: 3·89, 2·11–7·18), active cancer (progressing vs remission: 5·20, 2·77–9·77), and receipt of azithromycin plus hydroxychloroquine (vs treatment with neither: 2·93, 1·79–4·79; confounding by indication cannot be excluded). Compared with residence in the US-Northeast, residence in Canada (0·24, 0·07–0·84) or the US-Midwest (0·50, 0·28–0·90) were associated with decreased 30-day all-cause mortality. Race and ethnicity, obesity status, cancer type, type of anticancer therapy, and recent surgery were not associated with mortality.
         </textarea>
 
   </div>
 <div class="column">
 
-<form class="column">
+<form style="overflow-y: scroll; height:90vh;">
+
+    <input type="button" id="btnSearch" size="10" onclick="fetchResult()" value="Submit"/>
+    
     <table>
    <thead>
    <tr>
-       <th>Image</th>
-       <th>Name</th>
-       <th>Author</th>
+       <th></th>
+       <th><h1>Description</h1></th>
    </tr>
    </thead>
-  <tbody id="txtItems"></tbody>
+  <tbody id="entities"></tbody>
 </table>
 </form>
 </div>

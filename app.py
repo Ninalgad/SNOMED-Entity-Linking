@@ -1,65 +1,79 @@
-import pickle
+import torch
+import pandas as pd
 from flask import Flask, jsonify, render_template
 from gensim.models import KeyedVectors
 from sentence_transformers import SentenceTransformer
-from transformers import AutoModelForTokenClassification
+from transformers import AutoModelForTokenClassification, AutoTokenizer
+
+from segmentation import segment
 
 
 SEG_MODEL = AutoModelForTokenClassification.from_pretrained('xlreator/snomed-canine-s')
+SEG_TOKENIZER = AutoTokenizer.from_pretrained("google/canine-s")
+DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+THRESH = 0.5714285714285714
+
+EMB_MODEL = SentenceTransformer('xlreator/biosyn-biobert-snomed')
+EMB_FILE = 'vectors.kv'
 
 
-GIF_FILE = '../server/data/href.pkl'
-IMG_EMB_FILE = '../server/data/img-vectors.kv'
-TXT_EMB_FILE = '../server/data/txt-vectors.kv'
-SEG_MODEL = SentenceTransformer('clip-ViT-B-16')
+def clean_entity(t):
+    t = t.lower()
+    t = t.replace(' \n', " ")
+    t = t.replace('\n', " ")
+    return t
+
+
+def hash_to_rgb(hash_):
+    # Ensure hash string is at least 6 characters long
+    hash_str = str(abs(hash_))
+    # Split hash into three parts and convert each to decimal
+    r = int(hash_str[:2], 16)
+    g = int(hash_str[2:4], 16)
+    b = int(hash_str[4:6], 16)
+    return f"rgba({r}, {g}, {b}, .5)"
 
 
 class Linker:
-    def __init__(self, topk=10):
-        self.topk = topk
-        self._image_vectors = None
-        self._text_vectors = None
-        self._links = None
+    def __init__(self, context_window_width=18):
+        self._vectors = None
+        self.context_window_width = context_window_width
+
+    def add_context(self, row):
+        window_start = max(0, row.start - self.context_window_width)
+        window_end = min(row.end + self.context_window_width, len(row.text))
+        return clean_entity(row.text[window_start:window_end])
 
     def _load_embeddings(self):
-        self._image_vectors = KeyedVectors.load(IMG_EMB_FILE)
-        self._text_vectors = KeyedVectors.load(TXT_EMB_FILE)
-
-    def _load_gif_links(self):
-        with open(GIF_FILE, 'rb') as f:
-            self._links = pickle.load(f)
-
-    @property
-    def links(self):
-        if self._links is None:
-            self._load_gif_links()
-        return self._links
+        self._vectors = KeyedVectors.load(EMB_FILE)
 
     @property
     def embeddings(self):
-        if self._image_vectors is None:
+        if self._vectors is None:
             self._load_embeddings()
-        return {'img': self._image_vectors, 'text': self._text_vectors}
+        return self._vectors
 
-    def link(self, query: str) -> list[dict]:
-        query_emb = EMB_MODEL.encode([query])
-        similar_imgs = self.embeddings['img'].most_similar(query_emb, topn=self.topk)
-        similar_txts = self.embeddings['text'].most_similar(query_emb, topn=self.topk)
+    def link(self, df: pd.DataFrame) -> list[dict]:
+        mention_emb = EMB_MODEL.encode(df.mention.str.lower().values)
 
-        result = {'img': [{
-                'emote': emote,
-                'href': self.links[emote]['href'],
-                'author': self.links[emote]['author'],
-                'score': score
-            } for (emote, score) in similar_imgs],
-                'txt': [{
-                    'emote': emote,
-                    'href': self.links[emote]['href'],
-                    'author': self.links[emote]['author'],
-                    'score': score
-                } for (emote, score) in similar_txts]}
+        concepts = [self.embeddings.most_similar(m, topn=1)[0][0]
+                    for m in mention_emb]
+        return concepts
 
-        return result
+
+def insert_marker_html(spans, text):
+    highlighted = ""
+    pointer = 0
+
+    for row in spans.itertuples():
+        t = text[row.start: row.end]
+        t = f"<mark class='container__mark' style='background-color:{row.color};'>{t}</mark>"
+
+        highlighted += text[pointer:row.start] + t
+        pointer = row.end
+    highlighted += text[pointer:]
+
+    return highlighted
 
 
 app = Flask(__name__)
@@ -73,11 +87,20 @@ def main():
 
 @app.route('/search/<query>', methods=['GET', 'POST'])
 def entity_link(query):
+    query_df = pd.DataFrame({'note_id': [0], 'text': [query]})
     error = None
-    result = []
+    result = {}
 
     try:
-        result = linker.link(query)
+        seg = segment(query_df, SEG_MODEL, SEG_TOKENIZER, DEVICE, THRESH)
+        seg = seg.sort_values('start')
+        linked_concepts = linker.link(seg)
+        seg['concept'] = linked_concepts
+        seg['color'] = [hash_to_rgb(hash(x)) for x in linked_concepts]
+
+        result["highlight"] = insert_marker_html(seg, query)
+        result["tab"] = seg[['concept', 'color']].drop_duplicates().to_dict(orient='records')
+        print(result)
     except Exception as err:
         error = str(err)
     return jsonify(error=error, result=result)

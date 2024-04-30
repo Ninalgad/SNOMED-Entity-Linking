@@ -1,6 +1,11 @@
+@import url(https://fonts.googleapis.com/css?family=Open+Sans);
+
+
 .column {
   float: left;
   width: 50%;
+    box-sizing: border-box;
+    padding: 10px;
 }
 
 /* Clear floats after the columns */
@@ -10,23 +15,41 @@
   clear: both;
 }
 
-
 .container {
     position: relative;
-    height: 100vh;
+    height: 90vh;
     width: 100%;
 }
 .container__textarea {
     overflow-y: scroll;
-    height: 100vh;
+    height: 90vh;
     width: 100%;
     background: transparent;
     position: relative;
 }
+
 .container__mirror {
     position: absolute;
     height: 100vh;
     width: 100%;
     overflow: hidden;
     color: transparent;
+}
+
+.dot {
+  height: 12px;
+  width: 12px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+p {
+  text-align: left;
+  font: 9px 'Opens Sans', sans-serif;
+}
+
+h1 {
+  text-align: left;
+  font: 18px 'Opens Sans', sans-serif;
 }
