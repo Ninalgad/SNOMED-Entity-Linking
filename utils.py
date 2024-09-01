@@ -68,5 +68,12 @@ def align_decoded(x, d, y):
     if (clean_text != x) and (x[-1:] == "\n"):
         clean_text += "\n"
         clean_label += [0, 0]
-        print('?')
+
     return clean_text, clean_label
+
+
+def clean_entity(t):
+    t = t.lower()
+    t = t.replace(' \n', " ")
+    t = t.replace('\n', " ")
+    return t
