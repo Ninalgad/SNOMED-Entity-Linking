@@ -1,7 +1,12 @@
 # SNOMED-Entity-Linking
 A [Gradio](https://www.gradio.app/) app for Entity linking on the [SNOMED CT](https://www.snomed.org/five-step-briefing), a knowledge graph of clinical healthcare terminology.
 
+<div align="center">
+
+[website : huggingface.co/spaces/xlreator/SNOMED-Entity-Linking](https://huggingface.co/spaces/xlreator/SNOMED-Entity-Linking)
 ![](assests/screenshot.png)
+
+</div>
 
 ## Motivation
 Much of the world's healthcare data is stored in free-text documents, usually clinical notes taken by doctors. This unstructured data can be challenging to analyze and extract meaningful insights from.

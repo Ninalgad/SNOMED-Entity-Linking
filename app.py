@@ -96,3 +96,4 @@ demo = gr.Interface(
     ),
     theme=gr.themes.Base()
 )
+demo.launch()
